@@ -1,6 +1,30 @@
 require 'rails_helper'
 
 RSpec.describe Note, type: :model do
+
+  before do
+    @user = User.create(
+      first_name: 'Joe',
+      last_name:  'Tester',
+      email:      'joetester@example.com',
+      password:   'dottle-nouveau-pavillion-tights-furze'
+    )
+
+    @project = @user.projects.create(
+      name: 'Test Project'
+    )
+  end
+
+  # ユーザ、プロジェクト、メッセージがあれば有効な状態であること
+  it 'is valid with a user, project, message' do
+    note = Note.new(
+      user: @user,
+      project: @project,
+      message: 'This is a sample note.'
+    )
+    expect(note).to be_valid
+  end
+
   # メッセージがなければ無効な状態であること
   it "is invalid without a message" do
     note = Note.new(message: nil)
@@ -8,62 +32,37 @@ RSpec.describe Note, type: :model do
     expect(note.errors[:message]).to include("can't be blank")
   end
 
-  # 検索文字列に一致するメモを返すこと
-  it 'returns notes that match the search term' do
-    user = User.create(
-      first_name: 'Joe',
-      last_name:  'Tester',
-      email:      'joetester@example.com',
-      password:   'dottle-nouveau-pavillion-tights-furze'
-    )
+  # 文字列に一致するメッセージを検索する
+  describe 'search message for a term' do
 
-    project = user.projects.create(
-      name: 'Test Project'
-    )
+    before do
+      @note1 = @project.notes.create(
+        message: 'This is the first note.',
+        user: @user
+      )
+      @note2 = @project.notes.create(
+        message: 'This is the second note.',
+        user: @user
+      )
+      @note3 = @project.notes.create(
+        message: 'First, preheat the oven.',
+        user: @user
+      )
+    end
 
-    note1 = project.notes.create(
-      message: 'This is the first note.',
-      user: user
-    )
-    note2 = project.notes.create(
-      message: 'This is the second note.',
-      user: user
-    )
-    note3 = project.notes.create(
-      message: 'First, preheat the oven.',
-      user: user
-    )
+    context 'when a match is found' do
+      # 検索文字列に一致するメモを返すこと
+      it 'returns notes that match the search term' do
+        expect(Note.search('first')).to include(@note1, @note3)
+        expect(Note.search('first')).not_to include(@note2)
+      end
+    end
 
-    expect(Note.search('first')).to include(note1, note3)
-    expect(Note.search('first')).not_to include(note2)
-  end
-
-  # 検索結果が1件も見付からなければ空のコレクションを返すこと
-  it 'returns an empty collection when no results are found' do
-    user = User.create(
-      first_name: 'Joe',
-      last_name:  'Tester',
-      email:      'joetester@example.com',
-      password:   'dottle-nouveau-pavillion-tights-furze'
-    )
-
-    project = user.projects.create(
-      name: 'Test Project'
-    )
-
-    note1 = project.notes.create(
-      message: 'This is the first note.',
-      user: user
-    )
-    note2 = project.notes.create(
-      message: 'This is the second note.',
-      user: user
-    )
-    note3 = project.notes.create(
-      message: 'First, preheat the oven.',
-      user: user
-    )
-
-    expect(Note.search('message')).to be_empty
+    context 'when no match is found' do
+      # 検索結果が1件も見付からなければ空のコレクションを返すこと
+      it 'returns an empty collection when no results are found' do
+        expect(Note.search('message')).to be_empty
+      end
+    end
   end
 end
