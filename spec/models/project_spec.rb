@@ -1,19 +1,36 @@
 require 'rails_helper'
 
 RSpec.describe Project, type: :model do
+
+  before do
+    @user = User.create(
+      first_name: 'Joe',
+      last_name:  'Tester',
+      email:      'joetester@example.com',
+      password:   'dottle-nouveau-pavillion-tights-furze'
+    )
+  end
+
+  it 'is valid with name' do
+    project = Project.new(
+      owner: @user,
+      name: 'test project'
+    )
+    expect(project).to be_valid
+  end
+
+  it 'is invalid without name' do
+    project = Project.new(name: nil)
+    expect(project).to_not be_valid
+  end
+
   # ユーザ単位では重複したプロジェクトを許可しないこと
   it "does not allow duplicate project names per user" do
-    user = User.create(
-      first_name: "Aaron",
-      last_name:  "Summer",
-      email:      "tester@example.com",
-      password:   "dottle-nouveau-pavilion-tights-furze"
-    )
-    user.projects.create(
+    @user.projects.create(
       name: 'Test Project'
     )
 
-    new_project = user.projects.build(
+    new_project = @user.projects.build(
       name: 'Test Project'
     )
 
@@ -23,21 +40,15 @@ RSpec.describe Project, type: :model do
 
   # 二人のユーザーが同じ名前を使うことは許可すること
   it "allows two users to share a project name" do
-    user = User.create(
-      first_name: "Aaron",
-      last_name:  "Summer",
-      email:      "tester@example.com",
-      password:   "dottle-nouveau-pavilion-tights-furze"
+    @user.projects.create(
+      name: 'Test Project'
     )
+
     other_user = User.create(
       first_name: "Jane",
       last_name:  "Tester",
       email:      "testerb@example.com",
       password:   "dottle-nouveau-pavilion-tights-furze"
-    )
-
-    user.projects.create(
-      name: 'Test Project'
     )
 
     project = other_user.projects.build(
