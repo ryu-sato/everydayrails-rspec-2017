@@ -1,6 +1,13 @@
 require 'rails_helper'
 
 RSpec.describe Note, type: :model do
+  # メッセージがなければ無効な状態であること
+  it "is invalid without a message" do
+    note = Note.new(message: nil)
+    note.valid?
+    expect(note.errors[:message]).to include("can't be blank")
+  end
+
   # 検索文字列に一致するメモを返すこと
   it 'returns notes that match the search term' do
     user = User.create(
