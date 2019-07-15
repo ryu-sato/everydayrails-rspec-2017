@@ -1,0 +1,21 @@
+Style/AsciiComments:
+  Enabled: false
+# XXX: FrozenStringLiteralComment はファイル数が多くノイズになってしまっているため、現段階では無効にしておく
+#      Ruby 3.0 に上げる段階では必ず有効化する
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+inherit_mode:
+  merge:
+    - Exclude
+
+AllCops:
+  Exclude:
+    - 'bin/**/*'
+    - 'db/**/*'
+    - 'config/**/*'
+    - 'script/**/*'
+    - '.bundle/**/*'
+    - '.vscode/**/*'
+
+inherit_from: .rubocop_todo.yml
