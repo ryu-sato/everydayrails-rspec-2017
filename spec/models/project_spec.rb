@@ -3,35 +3,27 @@
 require 'rails_helper'
 
 RSpec.describe Project, type: :model do
-  before do
-    @user = User.create(
-      first_name: 'Joe',
-      last_name: 'Tester',
-      email: 'joetester@example.com',
-      password: 'dottle-nouveau-pavillion-tights-furze'
-    )
-  end
-
   it 'is valid with name' do
     project = Project.new(
-      owner: @user,
+      owner: FactoryBot.create(:user),
       name: 'test project'
     )
     expect(project).to be_valid
   end
 
   it 'is invalid without name' do
-    project = Project.new(name: nil)
+    project = FactoryBot.build(:project, name: nil)
     expect(project).to_not be_valid
   end
 
   # ユーザ単位では重複したプロジェクトを許可しないこと
   it 'does not allow duplicate project names per user' do
-    @user.projects.create(
+    user = FactoryBot.create(:user)
+
+    user.projects.create(
       name: 'Test Project'
     )
-
-    new_project = @user.projects.build(
+    new_project = user.projects.build(
       name: 'Test Project'
     )
 
@@ -41,17 +33,12 @@ RSpec.describe Project, type: :model do
 
   # 二人のユーザーが同じ名前を使うことは許可すること
   it 'allows two users to share a project name' do
-    @user.projects.create(
+    user = FactoryBot.create(:user)
+    other_user = FactoryBot.create(:user)
+
+    user.projects.create(
       name: 'Test Project'
     )
-
-    other_user = User.create(
-      first_name: 'Jane',
-      last_name: 'Tester',
-      email: 'testerb@example.com',
-      password: 'dottle-nouveau-pavilion-tights-furze'
-    )
-
     project = other_user.projects.build(
       name: 'Test Project'
     )
@@ -77,5 +64,10 @@ RSpec.describe Project, type: :model do
       project = FactoryBot.create(:project, :due_tomorrow)
       expect(project).to_not be_late
     end
+  end
+
+  it 'can have many notes' do
+    project = FactoryBot.create(:project, :with_notes)
+    expect(project.notes.length).to eq 5
   end
 end

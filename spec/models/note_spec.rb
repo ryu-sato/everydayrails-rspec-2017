@@ -3,19 +3,6 @@
 require 'rails_helper'
 
 RSpec.describe Note, type: :model do
-  before do
-    @user = User.create(
-      first_name: 'Joe',
-      last_name: 'Tester',
-      email: 'joetester@example.com',
-      password: 'dottle-nouveau-pavillion-tights-furze'
-    )
-
-    @project = @user.projects.create(
-      name: 'Test Project'
-    )
-  end
-
   # ファクトリで関連するデータを生成する
   it 'generates associated data from a factory' do
     note = FactoryBot.create(:note)
@@ -25,9 +12,10 @@ RSpec.describe Note, type: :model do
 
   # ユーザ、プロジェクト、メッセージがあれば有効な状態であること
   it 'is valid with a user, project, message' do
+    project = FactoryBot.create(:project)
     note = Note.new(
-      user: @user,
-      project: @project,
+      user: project.owner,
+      project: project,
       message: 'This is a sample note.'
     )
     expect(note).to be_valid
@@ -43,17 +31,18 @@ RSpec.describe Note, type: :model do
   # 文字列に一致するメッセージを検索する
   describe 'search message for a term' do
     before do
-      @note1 = @project.notes.create(
+      project = FactoryBot.create(:project)
+      @note1 = project.notes.create(
         message: 'This is the first note.',
-        user: @user
+        user: project.owner
       )
-      @note2 = @project.notes.create(
+      @note2 = project.notes.create(
         message: 'This is the second note.',
-        user: @user
+        user: project.owner
       )
-      @note3 = @project.notes.create(
+      @note3 = project.notes.create(
         message: 'First, preheat the oven.',
-        user: @user
+        user: project.owner
       )
     end
 
