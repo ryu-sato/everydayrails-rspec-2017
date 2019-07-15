@@ -22,18 +22,18 @@ RSpec.describe ProjectsController, type: :controller do
         expect(response).to have_http_status '200'
       end
     end
-  end
 
-  # ゲストとして
-  context 'as a guest' do
-    it 'returns a 302 response' do
-      get :index
-      expect(response).to have_http_status '302'
-    end
+    # ゲストとして
+    context 'as a guest' do
+      it 'returns a 302 response' do
+        get :index
+        expect(response).to have_http_status '302'
+      end
 
-    it 'redirects to the sign-in page' do
-      get :index
-      expect(response).to redirect_to '/users/sign_in'
+      it 'redirects to the sign-in page' do
+        get :index
+        expect(response).to redirect_to '/users/sign_in'
+      end
     end
   end
 
@@ -59,20 +59,71 @@ RSpec.describe ProjectsController, type: :controller do
         expect(response).to have_http_status '200'
       end
     end
+
+    # 認可されていないユーザとして
+    context 'as an unauthorized user' do
+      before do
+        @user = FactoryBot.create(:user)
+        other_user = FactoryBot.create(:user)
+        @project = FactoryBot.create(:project, owner: other_user)
+      end
+
+      it 'redirects to the dashboard' do
+        sign_in @user
+        get :show, params: { id: @project.id }
+        expect(response).to redirect_to root_path
+      end
+    end
   end
 
-  # 認可されていないユーザとして
-  context 'as an unauthorized user' do
-    before do
-      @user = FactoryBot.create(:user)
-      other_user = FactoryBot.create(:user)
-      @project = FactoryBot.create(:project, owner: other_user)
+  describe '#new' do
+    # ゲストとして
+    context 'as a guest' do
+      it 'returns a 302 response' do
+        get :new
+        expect(response).to have_http_status '302'
+      end
+
+      it 'redirects to the sign-in page' do
+        get :new
+        expect(response).to redirect_to '/users/sign_in'
+      end
+    end
+  end
+
+  describe '#edit' do
+    # 認可されていないユーザとして
+    context 'as an unauthorized user' do
+      before do
+        @user = FactoryBot.create(:user)
+        other_user = FactoryBot.create(:user)
+        @project = FactoryBot.create(:project, owner: other_user)
+      end
+
+      it 'redirects to the dashboard' do
+        sign_in @user
+        get :edit, params: { id: @project.id }
+        expect(response).to redirect_to root_path
+      end
     end
 
-    it 'redirects to the dashboard' do
-      sign_in @user
-      get :show, params: { id: @project.id }
-      expect(response).to redirect_to root_path
+    # ゲストとして
+    context 'as a guest' do
+      before do
+        @user = FactoryBot.create(:user)
+        other_user = FactoryBot.create(:user)
+        @project = FactoryBot.create(:project, owner: other_user)
+      end
+
+      it 'returns a 302 response' do
+        get :edit, params: { id: @project.id }
+        expect(response).to have_http_status '302'
+      end
+
+      it 'redirects to the sign-in page' do
+        get :edit, params: { id: @project.id }
+        expect(response).to redirect_to '/users/sign_in'
+      end
     end
   end
 
