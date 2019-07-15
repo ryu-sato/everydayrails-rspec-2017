@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
@@ -14,7 +16,7 @@ class User < ApplicationRecord
   after_create :send_welcome_email
 
   def name
-    [first_name, last_name].join(" ")
+    [first_name, last_name].join(' ')
   end
 
   geocoded_by :last_sign_in_ip do |user, result|
@@ -25,7 +27,7 @@ class User < ApplicationRecord
   end
 
   def local?
-    ["localhost", "127.0.0.1", "0.0.0.0"].include? last_sign_in_ip
+    ['localhost', '127.0.0.1', '0.0.0.0'].include? last_sign_in_ip
   end
 
   def after_database_authentication

@@ -1,13 +1,14 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Project, type: :model do
-
   before do
     @user = User.create(
       first_name: 'Joe',
-      last_name:  'Tester',
-      email:      'joetester@example.com',
-      password:   'dottle-nouveau-pavillion-tights-furze'
+      last_name: 'Tester',
+      email: 'joetester@example.com',
+      password: 'dottle-nouveau-pavillion-tights-furze'
     )
   end
 
@@ -25,7 +26,7 @@ RSpec.describe Project, type: :model do
   end
 
   # ユーザ単位では重複したプロジェクトを許可しないこと
-  it "does not allow duplicate project names per user" do
+  it 'does not allow duplicate project names per user' do
     @user.projects.create(
       name: 'Test Project'
     )
@@ -35,20 +36,20 @@ RSpec.describe Project, type: :model do
     )
 
     new_project.valid?
-    expect(new_project.errors[:name]).to include("has already been taken")
+    expect(new_project.errors[:name]).to include('has already been taken')
   end
 
   # 二人のユーザーが同じ名前を使うことは許可すること
-  it "allows two users to share a project name" do
+  it 'allows two users to share a project name' do
     @user.projects.create(
       name: 'Test Project'
     )
 
     other_user = User.create(
-      first_name: "Jane",
-      last_name:  "Tester",
-      email:      "testerb@example.com",
-      password:   "dottle-nouveau-pavilion-tights-furze"
+      first_name: 'Jane',
+      last_name: 'Tester',
+      email: 'testerb@example.com',
+      password: 'dottle-nouveau-pavilion-tights-furze'
     )
 
     project = other_user.projects.build(
