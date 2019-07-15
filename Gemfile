@@ -32,6 +32,7 @@ group :development do
   gem 'spring-commands-rspec'
 
   gem 'rubocop', require: false
+  gem 'solargraph'
 end
 
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]

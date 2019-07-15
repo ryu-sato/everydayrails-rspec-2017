@@ -1,0 +1,13 @@
+/ 既定の設定とユーザー設定を上書きするには、このファイル内に設定を挿入します
+{
+  // Automatically check if a new version of the Solargraph gem is available.
+  "solargraph.checkGemVersion": false,
+  // Use `bundle exec` to run solargraph. (If this is true, the solargraph.commandPath setting is ignored.)
+  "solargraph.useBundler": true,
+  // Enable definitions (go to, etc.)
+  "solargraph.definitions": true,
+  // Enable diagnostics
+  "solargraph.diagnostics": true,
+  // Enable document formatting
+  "solargraph.formatting": true,
+}
