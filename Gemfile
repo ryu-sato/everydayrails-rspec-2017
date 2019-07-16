@@ -16,7 +16,6 @@ gem 'jbuilder', '~> 2.5'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
-  gem 'capybara', '~> 2.13.0'
   gem 'selenium-webdriver'
 
   gem 'rspec-rails', '~> 3.6.0'
@@ -33,6 +32,12 @@ group :development do
 
   gem 'rubocop', require: false
   gem 'solargraph'
+end
+
+group :test do
+  gem 'capybara'
+  gem 'webdrivers'
+  gem 'launchy', '~> 2.4.3'
 end
 
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
