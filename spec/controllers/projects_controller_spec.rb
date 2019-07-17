@@ -4,20 +4,18 @@ RSpec.describe ProjectsController, type: :controller do
   describe '#index' do
     # 認証済みのユーザとして
     context 'as an authenticated user' do
-      before do
-        @user = FactoryBot.create(:user)
-      end
+      let(:user) { FactoryBot.create(:user) }
 
       # 正常にレスポンスを返すこと
       it 'responds successfully' do
-        sign_in @user
+        sign_in user
         get :index
         expect(response).to be_success
       end
 
       # 200レスポンスを返すこと
       it 'returns a 200 response' do
-        sign_in @user
+        sign_in user
         get :index
         expect(response).to have_http_status '200'
       end
@@ -40,37 +38,33 @@ RSpec.describe ProjectsController, type: :controller do
   describe '#show' do
     # 認可されたユーザとして
     context 'as an authorized user' do
-      before do
-        @user = FactoryBot.create(:user)
-        @project = FactoryBot.create(:project, owner: @user)
-      end
+      let(:user) { FactoryBot.create(:user) }
+      let(:project) { FactoryBot.create(:project, owner: user) }
 
       # 正常にレスポンスを返すこと
       it 'responds successfully' do
-        sign_in @user
-        get :show, params: { id: @project.id }
+        sign_in user
+        get :show, params: { id: project.id }
         expect(response).to be_success
       end
 
       # 200レスポンスを返すこと
       it 'returns a 200 response' do
-        sign_in @user
-        get :show, params: { id: @project.id }
+        sign_in user
+        get :show, params: { id: project.id }
         expect(response).to have_http_status '200'
       end
     end
 
     # 認可されていないユーザとして
     context 'as an unauthorized user' do
-      before do
-        @user = FactoryBot.create(:user)
-        other_user = FactoryBot.create(:user)
-        @project = FactoryBot.create(:project, owner: other_user)
-      end
+      let(:user) { FactoryBot.create(:user) }
+      let(:other_user) { FactoryBot.create(:user) }
+      let(:project) { FactoryBot.create(:project, owner: other_user) }
 
       it 'redirects to the dashboard' do
-        sign_in @user
-        get :show, params: { id: @project.id }
+        sign_in user
+        get :show, params: { id: project.id }
         expect(response).to redirect_to root_path
       end
     end
@@ -92,36 +86,28 @@ RSpec.describe ProjectsController, type: :controller do
   end
 
   describe '#edit' do
+    let(:user) { FactoryBot.create(:user) }
+    let(:other_user) { FactoryBot.create(:user) }
+    let(:project) { FactoryBot.create(:project, owner: other_user) }
+
     # 認可されていないユーザとして
     context 'as an unauthorized user' do
-      before do
-        @user = FactoryBot.create(:user)
-        other_user = FactoryBot.create(:user)
-        @project = FactoryBot.create(:project, owner: other_user)
-      end
-
       it 'redirects to the dashboard' do
-        sign_in @user
-        get :edit, params: { id: @project.id }
+        sign_in user
+        get :edit, params: { id: project.id }
         expect(response).to redirect_to root_path
       end
     end
 
     # ゲストとして
     context 'as a guest' do
-      before do
-        @user = FactoryBot.create(:user)
-        other_user = FactoryBot.create(:user)
-        @project = FactoryBot.create(:project, owner: other_user)
-      end
-
       it 'returns a 302 response' do
-        get :edit, params: { id: @project.id }
+        get :edit, params: { id: project.id }
         expect(response).to have_http_status '302'
       end
 
       it 'redirects to the sign-in page' do
-        get :edit, params: { id: @project.id }
+        get :edit, params: { id: project.id }
         expect(response).to redirect_to '/users/sign_in'
       end
     end
@@ -130,19 +116,17 @@ RSpec.describe ProjectsController, type: :controller do
   describe '#create' do
     # 認証済みのユーザとして
     context 'as an authorized user' do
-      before do
-        @user = FactoryBot.create(:user)
-      end
+      let(:user) { FactoryBot.create(:user) }
 
       # 有効な属性値の場合
       context 'with valid attributes' do
         # プロジェクトを追加できること
         it 'adds a project' do
           project_params = FactoryBot.attributes_for(:project)
-          sign_in @user
+          sign_in user
           expect do
             post :create, params: { project: project_params }
-          end.to change(@user.projects, :count).by(1)
+          end.to change(user.projects, :count).by(1)
         end
       end
 
@@ -150,10 +134,10 @@ RSpec.describe ProjectsController, type: :controller do
         # プロジェクトを追加できないこと
         it 'does not add a project' do
           project_params = FactoryBot.attributes_for(:project, :invalid)
-          sign_in @user
+          sign_in user
           expect do
             post :create, params: { project: project_params }
-          end.to_not change(@user.projects, :count)
+          end.to_not change(user.projects, :count)
         end
       end
     end
@@ -179,10 +163,8 @@ RSpec.describe ProjectsController, type: :controller do
   describe '#update' do
     # 認証済みのユーザとして
     context 'as an authorized user' do
-      before do
-        @user = FactoryBot.create(:user)
-        @project = FactoryBot.create(:project, owner: @user)
-      end
+      let(:user) { FactoryBot.create(:user) }
+      let(:project) { FactoryBot.create(:project, owner: user) }
 
       # プロジェクトを更新できること
       it 'updates a project' do
@@ -190,21 +172,19 @@ RSpec.describe ProjectsController, type: :controller do
           :project,
           name: 'New Project Name'
         )
-        sign_in @user
-        patch :update, params: { id: @project.id, project: project_params }
-        expect(@project.reload.name).to eq 'New Project Name'
+        sign_in user
+        patch :update, params: { id: project.id, project: project_params }
+        expect(project.reload.name).to eq 'New Project Name'
       end
     end
 
     # 認可されていないユーザとして
     context 'as an anauthorized user' do
-      before do
-        @user = FactoryBot.create(:user)
-        other_user = FactoryBot.create(:user)
-        @project = FactoryBot.create(:project,
-                                     owner: other_user,
-                                     name: 'Same Old Name')
-      end
+      let(:user) { FactoryBot.create(:user) }
+      let(:other_user) { FactoryBot.create(:user) }
+      let(:project) { FactoryBot.create(:project, 
+                                        owner: other_user,
+                                        name: 'Same Old Name')}
 
       # プロジェクトを更新できないこと
       it 'does not update the project' do
@@ -212,17 +192,17 @@ RSpec.describe ProjectsController, type: :controller do
           :project,
           name: 'New Project Name'
         )
-        sign_in @user
-        patch :update, params: { id: @project.id, project: project_params }
-        expect(@project.reload.name).to eq 'Same Old Name'
+        sign_in user
+        patch :update, params: { id: project.id, project: project_params }
+        expect(project.reload.name).to eq 'Same Old Name'
       end
 
       # ダッシュボードへリダイレクトされること
       it 'redirects to the dashboard' do
         project_params = FactoryBot.attributes_for(:project)
-        sign_in @user
-        patch :update, params: { id: @project.id, project: project_params }
-        expect(@project.reload.name).to redirect_to root_path
+        sign_in user
+        patch :update, params: { id: project.id, project: project_params }
+        expect(project.reload.name).to redirect_to root_path
       end
     end
 
@@ -247,66 +227,60 @@ RSpec.describe ProjectsController, type: :controller do
   describe '#destroy' do
     # 認証済みのユーザとして
     context 'as an authorized user' do
-      before do
-        @user = FactoryBot.create(:user)
-        @project = FactoryBot.create(:project, owner: @user)
-      end
+      let(:user) { FactoryBot.create(:user) }
+      let!(:project) { FactoryBot.create(:project, owner: user) }
 
       # プロジェクトを削除できること
       it 'updates a project' do
-        sign_in @user
+        sign_in user
         expect do
-          delete :destroy, params: { id: @project.id }
-        end.to change(@user.projects, :count).by(-1)
+          delete :destroy, params: { id: project.id }
+        end.to change(user.projects, :count).by(-1)
       end
     end
 
     # 認可されていないユーザとして
     context 'as an anauthorized user' do
-      before do
-        @user = FactoryBot.create(:user)
-        other_user = FactoryBot.create(:user)
-        @project = FactoryBot.create(:project, owner: other_user)
-      end
+      let(:user) { FactoryBot.create(:user) }
+      let(:other_user) { FactoryBot.create(:user) }
+      let(:project) { FactoryBot.create(:project, owner: other_user) }
 
       # プロジェクトを削除できないこと
       it 'does not update the project' do
-        sign_in @user
+        sign_in user
         expect do
-          delete :destroy, params: { id: @project.id }
-        end.to_not change(@user.projects, :count)
+          delete :destroy, params: { id: project.id }
+        end.to_not change(user.projects, :count)
       end
 
       # ダッシュボードへリダイレクトされること
       it 'redirects to the dashboard' do
-        sign_in @user
-        delete :destroy, params: { id: @project.id }
-        expect(@project.reload.name).to redirect_to root_path
+        sign_in user
+        delete :destroy, params: { id: project.id }
+        expect(project.reload.name).to redirect_to root_path
       end
     end
 
     # ゲストとして
     context 'as an guest' do
-      before do
-        @project = FactoryBot.create(:project)
-      end
+      let!(:project) { FactoryBot.create(:project) }
 
       # 302レスポンスを返すこと
       it 'returns a 302 response' do
-        delete :destroy, params: { id: @project.id }
+        delete :destroy, params: { id: project.id }
         expect(response).to have_http_status '302'
       end
 
       # サインイン画面にリダイレクトされること
       it 'redirects to the sign-in page' do
-        delete :destroy, params: { id: @project.id }
+        delete :destroy, params: { id: project.id }
         expect(response).to redirect_to '/users/sign_in'
       end
 
       # プロジェクトを削除できないこと
       it 'does not update the project' do
         expect do
-          delete :destroy, params: { id: @project.id }
+          delete :destroy, params: { id: project.id }
         end.to_not change(Project, :count)
       end
     end
