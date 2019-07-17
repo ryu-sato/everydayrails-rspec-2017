@@ -1,6 +1,8 @@
 require 'rails_helper'
 
 RSpec.feature 'Tasks', type: :feature do
+  include LoginSupport
+
   # ユーザーがタスクの状態を切り替える
   scenario 'user toggles a task', js: true do
     user = FactoryBot.create(:user)
@@ -8,12 +10,7 @@ RSpec.feature 'Tasks', type: :feature do
                                 name: 'RSpec tutorial',
                                 owner: user)
     task = project.tasks.create!(name: 'Finish RSpec tutorial')
-
-    visit root_path
-    click_link 'Sign in'
-    fill_in 'Email', with: user.email
-    fill_in 'Password', with: user.password
-    click_button 'Log in'
+    sign_in_as user
 
     click_link 'RSpec tutorial'
     check 'Finish RSpec tutorial'
